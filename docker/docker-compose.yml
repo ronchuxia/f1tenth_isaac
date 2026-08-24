@@ -1,0 +1,45 @@
+services:
+  isaac:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: f1tenth-isaac:latest
+    container_name: f1tenth-isaac
+
+    # ── GPU access (CDI) ───────────────────────────────────────────────────────
+    devices:
+      - nvidia.com/gpu=all
+
+    # ── Display (X11 forwarding to the host's X server) ────────────────────────
+    environment:
+      - DISPLAY=${DISPLAY:-}
+
+    volumes:
+      # X11 socket for forwarding
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+      # Workspace mounted into the container
+      - ..:/workspace
+
+      # Isaac Sim caches – persist across container recreation to avoid
+      # re-downloading assets and re-compiling shaders on every start.
+      - isaac-cache-kit:/opt/isaac-sim/kit/cache
+      - isaac-cache-ov:/root/.cache/ov
+      - isaac-cache-pip:/root/.cache/pip
+      - isaac-cache-gl:/root/.cache/nvidia/GLCache
+      - isaac-cache-compute:/root/.nv/ComputeCache
+
+    # ── Runtime ───────────────────────────────────────────────────────────────
+    # Large /dev/shm for Isaac Sim / PyTorch shared memory
+    shm_size: "8gb"
+    privileged: false
+    stdin_open: true
+    tty: true
+
+# Named volumes for Isaac Sim caches
+volumes:
+  isaac-cache-kit:
+  isaac-cache-ov:
+  isaac-cache-pip:
+  isaac-cache-gl:
+  isaac-cache-compute:
