@@ -1,0 +1,13 @@
+{
+  "collision_collections": [],
+  "collision_objects": [
+    "Atrium_Carpet_Tiles",
+    "NSH_Detail_Atrium_Extension_Floor",
+    "Pillar_Visual_-1",
+    "Pillar_Visual_1",
+    "Race3_Black_Duct_Outer",
+    "Race3_Black_Duct_Outer_Ribs",
+    "Race3_Yellow_Duct_Inner",
+    "Race3_Yellow_Duct_Inner_Ribs"
+  ]
+}

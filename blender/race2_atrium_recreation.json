@@ -1,0 +1,19 @@
+{
+  "collision_collections": [],
+  "collision_objects": [
+    "Atrium_Carpet_Tiles",
+    "Black_Duct_Outer_Fine_Ribs",
+    "Black_Duct_Outer_Video_Sleeve",
+    "NSH_Detail_Atrium_Extension_Floor",
+    "Pillar_Visual_-1",
+    "Pillar_Visual_1",
+    "Yellow_Duct_Left_Hook_Fine_Ribs",
+    "Yellow_Duct_Left_Hook_Video_Sleeve",
+    "Yellow_Duct_Lower_Hook_Fine_Ribs",
+    "Yellow_Duct_Lower_Hook_Video_Sleeve",
+    "Yellow_Duct_Pillar_Connected_Fine_Ribs",
+    "Yellow_Duct_Pillar_Connected_Video_Sleeve",
+    "Yellow_Duct_Upper_Hook_Fine_Ribs",
+    "Yellow_Duct_Upper_Hook_Video_Sleeve"
+  ]
+}
