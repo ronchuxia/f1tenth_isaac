@@ -179,6 +179,8 @@ def main():
         selected_objects_only=True,
         export_animation=False,
         export_materials=True,
+        # Preserve concave Boolean openings instead of relying on renderer tessellation.
+        triangulate_meshes=True,
         export_textures_mode="NEW",
         overwrite_textures=True,
         export_custom_properties=True,
