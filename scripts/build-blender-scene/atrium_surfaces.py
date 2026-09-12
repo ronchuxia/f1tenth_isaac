@@ -130,6 +130,24 @@ def surfaces():
     material('Dark_Metal', base=(0.09, 0.1, 0.1), roughness=0.36, metallic=0.6)
     material('Maroon_Steel', base=(0.26, 0.055, 0.045), roughness=0.43, metallic=0.15)
 
+def duct_fabric_images(name, distances, yellow):
+    """Generate final fabric color and normal pixels for direct texture export."""
+    OUT.mkdir(parents=True, exist_ok=True)
+    length = distances[-1]
+    pitch = 0.06 if yellow else 0.033
+    (width, height) = (4096, 512) if length > 8 else (2048, 512)
+    (v, u) = np.mgrid[0:height, 0:width] / np.array([height, width])[:, None, None]
+    along = np.interp(u, np.linspace(0, 1, len(distances)), distances)
+    phase = along / pitch + 0.08 * np.sin(v * math.tau * 5 + along * 4)
+    folds = np.cos(math.tau * phase)
+    fine = np.sin(v * math.tau * 63 + along * 21) * 0.045
+    shade = 0.9 + 0.08 * folds + fine
+    base = np.array((0.9, 0.76, 0.004) if yellow else (0.012, 0.013, 0.014))
+    diff = image(name + '_fabric_color', shade[:, :, None] * base)
+    normal = normal_image(name + '_fabric_normal', folds + fine, 0.6 if yellow else 0.5)
+    return diff, normal
+
+
 def ducts(collection):
     wire = material('Race2_Duct_Wire', base=(0.013, 0.012, 0.01), roughness=0.36, metallic=0.18)
     ring_count = 0
@@ -144,16 +162,7 @@ def ducts(collection):
         length = distances[-1]
         yellow = obj.name.startswith('Yellow')
         pitch = 0.06 if yellow else 0.033
-        (width, height) = (4096, 512) if length > 8 else (2048, 512)
-        (v, u) = np.mgrid[0:height, 0:width] / np.array([height, width])[:, None, None]
-        along = np.interp(u, np.linspace(0, 1, len(points)), distances)
-        phase = along / pitch + 0.08 * np.sin(v * math.tau * 5 + along * 4)
-        folds = np.cos(math.tau * phase)
-        fine = np.sin(v * math.tau * 63 + along * 21) * 0.045
-        shade = 0.9 + 0.08 * folds + fine
-        base = np.array((0.9, 0.76, 0.004) if yellow else (0.012, 0.013, 0.014))
-        diff = image(obj.name + '_fabric_color', shade[:, :, None] * base)
-        normal = normal_image(obj.name + '_fabric_normal', folds + fine, 0.6 if yellow else 0.5)
+        diff, normal = duct_fabric_images(obj.name, distances, yellow)
         mat = material(obj.name + '_Video_Fabric', diff, normal=normal, roughness=0.4 if yellow else 0.34, uv='UVMap')
         obj.data.materials.clear()
         obj.data.materials.append(mat)

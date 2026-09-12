@@ -40,6 +40,7 @@ def main():
             for spline in obj.data.splines:
                 spline.use_smooth = True
     atrium_assets.refine_track_tessellation()
+    race3_track.apply_barrier_materials(track)
     for collection in list(bpy.data.collections):
         if collection.name.startswith('Race2'):
             collection.name = collection.name.replace('Race2', 'Race3', 1)

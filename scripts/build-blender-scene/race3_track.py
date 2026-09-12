@@ -63,3 +63,31 @@ def build_race3_track(collection, duct_materials):
 
 def build_race3_overlay(collection):
     return atrium_common.build_image_overlay('Race3_Map_Ground_Overlay', collection, OVERLAY_PATH, race3_map_to_world, MAP_RESOLUTION, 'Map centered with its irregular contour on the pillar side')
+
+
+def apply_barrier_materials(collection):
+    """Use Race2's generated fabric textures on the existing Race3 geometry."""
+    import numpy as np
+    from atrium_surfaces import duct_fabric_images, material
+
+    wire = material('Race3_Duct_Wire', base=(0.013, 0.012, 0.01),
+                    roughness=0.36, metallic=0.18)
+    for obj in collection.objects:
+        if obj.name.endswith('_Ribs'):
+            mat = wire
+        elif obj.type == 'CURVE':
+            spline = obj.data.splines[0]
+            points = np.array([list(p.co)[:3] for p in spline.points])
+            if spline.use_cyclic_u:
+                points = np.vstack((points, points[0]))
+            distances = np.r_[0.0, np.cumsum(np.linalg.norm(np.diff(points, axis=0), axis=1))]
+            yellow = obj.name.startswith('Race3_Yellow')
+            color, normal = duct_fabric_images(obj.name, distances, yellow)
+            color.pack()
+            normal.pack()
+            mat = material(obj.name + '_Video_Fabric', color, normal=normal,
+                           roughness=0.4 if yellow else 0.34, uv='UVMap')
+        else:
+            continue
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
