@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from pxr import Gf, Usd, UsdGeom, UsdPhysics
+from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics
 
 from f1tenth_lidar_asset import add_lidar
 
@@ -40,7 +40,14 @@ frame_world = Gf.Matrix4d(1).SetTranslate(Gf.Vec3d(-0.17, 0, 0.052))
 frame = UsdGeom.Xform.Define(stage, chassis.GetPath().AppendChild('base_link'))
 frame.AddTransformOp().Set(frame_world * chassis_world.GetInverse())
 
+# Add OmniLidar
 add_lidar(stage, chassis)
+
+# Add OmniSensorAPI to Camera
+for side in ('Left', 'Right'):
+    camera = stage.GetPrimAtPath(chassis.GetPath().AppendChild('Camera_' + side))
+    camera.ApplyAPI('OmniSensorAPI')
+    camera.CreateAttribute('omni:sensor:tickRate', Sdf.ValueTypeNames.Float, custom=False).Set(30)
 
 stage.GetRootLayer().Save()
 print(output)
