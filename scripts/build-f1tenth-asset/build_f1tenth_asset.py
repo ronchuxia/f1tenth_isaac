@@ -4,7 +4,10 @@ from pathlib import Path
 
 from pxr import Gf, Usd, UsdGeom, UsdPhysics
 
-project = Path(__file__).resolve().parents[1]
+from f1tenth_lidar_asset import add_lidar
+
+project = Path(__file__).resolve().parents[2]
+
 source = project / 'assets/robots/f1tenth/nvidia/F1Tenth.usd'
 output = project / 'assets/robots/f1tenth/f1tenth.usda'
 
@@ -36,6 +39,8 @@ chassis_world = UsdGeom.XformCache().GetLocalToWorldTransform(chassis)
 frame_world = Gf.Matrix4d(1).SetTranslate(Gf.Vec3d(-0.17, 0, 0.052))
 frame = UsdGeom.Xform.Define(stage, chassis.GetPath().AppendChild('base_link'))
 frame.AddTransformOp().Set(frame_world * chassis_world.GetInverse())
+
+add_lidar(stage, chassis)
 
 stage.GetRootLayer().Save()
 print(output)
