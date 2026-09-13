@@ -46,7 +46,7 @@ add_lidar(stage, chassis)
 # Add OmniSensorAPI to Camera
 for side in ('Left', 'Right'):
     camera = stage.GetPrimAtPath(chassis.GetPath().AppendChild('Camera_' + side))
-    camera.ApplyAPI('OmniSensorAPI')
+    camera.AddAppliedSchema('OmniSensorAPI')
     camera.CreateAttribute('omni:sensor:tickRate', Sdf.ValueTypeNames.Float, custom=False).Set(30)
 
 stage.GetRootLayer().Save()
