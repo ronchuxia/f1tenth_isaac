@@ -25,6 +25,10 @@ for name in ('Wheel__Upright__Rear_Left', 'Wheel__Upright__Rear_Right',
     drive = UsdPhysics.DriveAPI.Apply(joint, 'angular')
     drive.GetTargetVelocityAttr().Set(0.0)
 
+# Mirror the left shock's upper anchor.
+right_shock = UsdPhysics.Joint(stage.GetPrimAtPath('/F1Tenth/Joints/Shock__Rear_Right'))
+right_shock.GetLocalPos1Attr().Set(Gf.Vec3f(-15.200001, -5.7000003, 7))
+
 # Add Xform base_link
 chassis = stage.GetPrimAtPath('/F1Tenth/Rigid_Bodies/Chassis')
 chassis_world = UsdGeom.XformCache().GetLocalToWorldTransform(chassis)
