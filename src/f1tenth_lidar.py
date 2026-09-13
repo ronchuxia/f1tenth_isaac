@@ -26,13 +26,13 @@ class F1TenthLidar:
         if not output.numElements:
             return None
 
-        # annotator returns angles in decreasing order
-        ranges = output.z[::-1]
+        # Isaac Sim 6.1 returns CCW profile in increasing angle order.
+        ranges = output.z
 
         # invalid ranges
         ranges[ranges == 0] = np.inf
         
         return dict(timestamp_ns=int(output.timestampNs),
-                    angles=np.deg2rad(output.x[::-1]), 
+                    angles=np.deg2rad(output.x),
                     ranges=ranges,
-                    time_offsets_ns=output.timeOffsetNs[::-1])
+                    time_offsets_ns=output.timeOffsetNs)

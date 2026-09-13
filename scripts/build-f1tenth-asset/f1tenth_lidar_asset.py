@@ -42,14 +42,14 @@ def add_lidar(stage, chassis):
                         ('azimuthErrorStd', 0), 
                         ('elevationErrorStd', 0),
                         ('rangeAccuracyM', 0),
-                        ('startAzimuthOffsetDeg', -135),
+                        ('startAzimuthOffsetDeg', -135.25),
                         ('validStartAzimuthDeg', 0), 
-                        ('validEndAzimuthDeg', 270.25)]:    # End angle is exclusive
+                        ('validEndAzimuthDeg', 270.25)]:
         attr('Core:' + name, Sdf.ValueTypeNames.Float, value)
     for name in ('accumulateOutputs', 'skipDroppingInvalidPoints'):
         attr('Core:' + name, Sdf.ValueTypeNames.Bool, True)
     prefix = 'Core:emitterState:s001:'
-    attr(prefix + 'azimuthDeg', Sdf.ValueTypeNames.FloatArray, [0])
+    attr(prefix + 'azimuthDeg', Sdf.ValueTypeNames.FloatArray, [270.25])
     attr(prefix + 'elevationDeg', Sdf.ValueTypeNames.FloatArray, [0])
     attr(prefix + 'channelId', Sdf.ValueTypeNames.UIntArray, [1])
     attr(prefix + 'fireTimeNs', Sdf.ValueTypeNames.UIntArray, [0])
