@@ -1,0 +1,37 @@
+"""Generate our NVIDIA-based vehicle override using Isaac Sim's Python."""
+import os
+from pathlib import Path
+
+from pxr import Gf, Usd, UsdGeom, UsdPhysics
+
+project = Path(__file__).resolve().parents[1]
+source = project / 'assets/robots/f1tenth/nvidia/F1Tenth.usd'
+output = project / 'assets/robots/f1tenth/f1tenth.usda'
+
+output.parent.mkdir(parents=True, exist_ok=True)
+
+stage = Usd.Stage.CreateNew(str(output))
+UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
+
+car = UsdGeom.Xform.Define(stage, '/F1Tenth').GetPrim()
+car.GetReferences().AddReference(os.path.relpath(source, output.parent))
+stage.SetDefaultPrim(car)
+
+# Apply DriveAPI
+for name in ('Wheel__Upright__Rear_Left', 'Wheel__Upright__Rear_Right',
+             'Wheel__Knuckle__Front_Left', 'Wheel__Knuckle__Front_Right'):
+    joint = stage.GetPrimAtPath(f'/F1Tenth/Joints/{name}')
+    drive = UsdPhysics.DriveAPI.Apply(joint, 'angular')
+    drive.GetTargetVelocityAttr().Set(0.0)
+
+# Add Xform base_link
+chassis = stage.GetPrimAtPath('/F1Tenth/Rigid_Bodies/Chassis')
+chassis_world = UsdGeom.XformCache().GetLocalToWorldTransform(chassis)
+
+frame_world = Gf.Matrix4d(1).SetTranslate(Gf.Vec3d(-0.17, 0, 0.052))
+frame = UsdGeom.Xform.Define(stage, chassis.GetPath().AppendChild('base_link'))
+frame.AddTransformOp().Set(frame_world * chassis_world.GetInverse())
+
+stage.GetRootLayer().Save()
+print(output)
