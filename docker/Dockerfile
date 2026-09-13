@@ -55,17 +55,21 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
     && rosdep update \
     && rm -rf /var/lib/apt/lists/*
 
-# ─── Isaac Sim 6.0.1 (standalone) ─────────────────────────────────────────────
+# ─── Isaac Sim 6.1.0 (standalone) ─────────────────────────────────────────────
 RUN wget -q -O /tmp/isaac-sim.zip \
-        https://downloads.isaacsim.nvidia.com/isaac-sim-standalone-6.0.1-linux-x86_64.zip && \
+        https://downloads.isaacsim.nvidia.com/isaac-sim-standalone-6.1.0-linux-x86_64.zip && \
     mkdir -p ${ISAACSIM_PATH} && \
     unzip -q /tmp/isaac-sim.zip -d ${ISAACSIM_PATH} && \
     rm /tmp/isaac-sim.zip && \
     cd ${ISAACSIM_PATH} && ./post_install.sh
 
-# ─── Isaac Lab 3.0.0-beta2 (GitHub tag v3.0.0-beta2) ─────────────────────────
-RUN git clone --branch v3.0.0-beta2 --depth 1 \
-        https://github.com/isaac-sim/IsaacLab.git ${ISAACLAB_PATH}
+# ─── Isaac Lab 3.0.0 (release/3.0.0 at tested commit) ───────────────────────
+ARG ISAACLAB_COMMIT=3cd1279e63effc1b82b51f70ec3250cec10d21f5
+RUN git init ${ISAACLAB_PATH} && \
+    cd ${ISAACLAB_PATH} && \
+    git remote add origin https://github.com/isaac-sim/IsaacLab.git && \
+    git fetch --depth 1 origin ${ISAACLAB_COMMIT} && \
+    git checkout --detach FETCH_HEAD
 
 WORKDIR ${ISAACLAB_PATH}
 
@@ -76,14 +80,6 @@ RUN ln -s ${ISAACSIM_PATH} ${ISAACLAB_PATH}/_isaac_sim && \
 # ─── Omniverse Kit root guard ─────────────────────────────────────────────────
 # Required for running Omniverse Kit as root in the container.
 ENV OMNI_KIT_ALLOW_ROOT=1
-
-# ─── Fix: deprecated ml_archive ships a broken torch ──────────────────────────
-# The deprecated omni.isaac.ml_archive extension prepends its own torch 2.11.0
-# to sys.path. Its libtorch_cuda.so has an undefined NCCL symbol
-# (ncclDevCommCreate) and aborts Isaac Sim startup. Remove it so the working
-# torch that isaaclab.sh installed into Isaac Sim's site-packages is used.
-RUN cd ${ISAACSIM_PATH}/extsDeprecated/omni.isaac.ml_archive/pip_prebundle && \
-    rm -rf torch torchvision torchaudio nvidia
 
 # ─── Shell environment ─────────────────────────────────────────────────────────
 RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc && \
