@@ -2048,29 +2048,6 @@ def build_props(collection, materials):
             collection,
         )
 
-    for index, x in enumerate((-36.0, -30.0, -24.0, -18.0, -12.0, -6.0)):
-        if x <= -17.65:
-            north_y = 0.039221 * x + 1.984
-        elif x <= -3.50:
-            north_y = 0.063533 * x + 2.377
-        else:
-            north_y = 0.081709 * x + 2.876
-        if x <= -17.60:
-            south_y = 0.030157 * x - 0.430
-        elif x <= -2.50:
-            south_y = 0.057916 * x + 0.094
-        else:
-            south_y = 0.036585 * x + 0.029
-        add_segment_box(
-            f"Tepper_Corridor_Floor_Joint_{index + 1:02d}",
-            (x, south_y + 0.10),
-            (x, north_y - 0.10),
-            0.004,
-            0.014,
-            materials["kiosk"],
-            collection,
-            bottom_z=0.021,
-        )
 
 
 def add_ceiling_fixture(name, location, dimensions, materials, collection):

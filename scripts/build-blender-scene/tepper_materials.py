@@ -190,7 +190,6 @@ def build_materials():
         "padlock_silver": simple_material("Tepper_Padlock_Silver", (0.62, 0.63, 0.65), roughness=0.25, metallic=1.0),
         "kiosk": simple_material("Tepper_Kiosk_Charcoal", (0.50, 0.45, 0.37), roughness=0.45),
         "label_red": simple_material("Tepper_Feature_Red", (0.5, 0.02, 0.02), roughness=0.4),
-        "joint": simple_material("Tepper_Floor_Joint", (0.14, 0.13, 0.12), roughness=0.8),
         "arm": simple_material("Tepper_Robot_Arm_Paint", (0.72, 0.74, 0.76), roughness=0.35),
         "arm_joint": simple_material("Tepper_Robot_Arm_Joint", (0.10, 0.12, 0.16), roughness=0.4),
         "laminate": simple_material("Tepper_Station_Laminate", (0.12, 0.11, 0.10), roughness=0.5),
@@ -256,8 +255,6 @@ def assign_materials(materials):
             set_material(obj, materials["plinth"])
         elif re.fullmatch(r"Tepper_Changing_Room_Door_\d", name) or name.endswith("_Room_Door"):
             set_material(obj, materials["door_paint"])
-        elif name.startswith("Tepper_Corridor_Floor_Joint"):
-            set_material(obj, materials["joint"])
         elif name.startswith("Tepper_Robot_Arm_Joint"):
             set_material(obj, materials["arm_joint"])
     arm = bpy.data.objects.get("Tepper_Robot_Arm")
