@@ -23,6 +23,7 @@ from isaacsim.core.simulation_manager import SimulationManager
 
 sys.path.insert(0, str(project / 'src'))
 from f1tenth_scene import load_scene
+from f1tenth_map import publish_map
 
 for extension in ('isaacsim.ros2.bridge', 'isaacsim.robot.wheeled_robots.nodes'):
     app_utils.enable_extension(extension)
@@ -48,7 +49,9 @@ if not args.headless:
 print('config:', args.config, flush=True)
 print('map:', config['map'], flush=True)
 
-while app.is_running():
-    app.update()
-
-app.close()
+try:
+    with publish_map(project / config['map']):
+        while app.is_running():
+            app.update()
+finally:
+    app.close()

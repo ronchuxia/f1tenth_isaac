@@ -49,6 +49,8 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
         | tee /etc/apt/sources.list.d/ros2.list > /dev/null && \
     apt-get update && apt-get install -y --no-install-recommends \
         ros-humble-desktop \
+        ros-humble-nav2-map-server \
+        ros-humble-nav2-lifecycle-manager \
         python3-colcon-common-extensions \
         python3-rosdep \
     && rosdep init \
