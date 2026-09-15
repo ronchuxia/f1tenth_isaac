@@ -12,7 +12,7 @@ from isaacsim.core.experimental.utils import app as app_utils
 from isaacsim.core.experimental.prims import RigidPrim
 from isaacsim.core.simulation_manager import SimulationManager
 
-for extension in ('isaacsim.ros2.bridge', 'isaacsim.robot.wheeled_robots.nodes'):
+for extension in ('isaacsim.ros2.bridge', 'isaacsim.robot.wheeled_robots.nodes', 'omni.graph.scriptnode'):
     app_utils.enable_extension(extension)
 
 project = Path(__file__).resolve().parents[2]
@@ -52,6 +52,7 @@ keys = og.Controller.Keys
 nodes = [('Tick', 'omni.graph.action.OnPlaybackTick'),
          ('Subscription', 'isaacsim.ros2.bridge.ROS2SubscribeAckermannDrive'),
          ('Ackermann', 'isaacsim.robot.wheeled_robots.AckermannController'),
+         ('WheelHeadings', 'omni.graph.scriptnode.ScriptNode'),
          ('Steering', 'isaacsim.core.nodes.IsaacArticulationController'),
          ('Velocity', 'isaacsim.core.nodes.IsaacArticulationController')]
 
@@ -59,10 +60,26 @@ connections = [('Tick.outputs:tick', 'Subscription.inputs:execIn'),
                ('Subscription.outputs:execOut', 'Ackermann.inputs:execIn'),
                ('Subscription.outputs:speed', 'Ackermann.inputs:speed'),
                ('Subscription.outputs:steeringAngle', 'Ackermann.inputs:steeringAngle'),
-               ('Ackermann.outputs:execOut', 'Steering.inputs:execIn'),
+               ('Tick.outputs:tick', 'WheelHeadings.inputs:execIn'),
+               ('WheelHeadings.outputs:execOut', 'Steering.inputs:execIn'),
                ('Ackermann.outputs:execOut', 'Velocity.inputs:execIn'),
-               ('Ackermann.outputs:wheelAngles', 'Steering.inputs:positionCommand'),
+               ('Ackermann.outputs:wheelAngles', 'WheelHeadings.inputs:headings'),
+               ('WheelHeadings.outputs:positions', 'Steering.inputs:positionCommand'),
                ('Ackermann.outputs:wheelRotationVelocity', 'Velocity.inputs:velocityCommand')]
+
+wheel_headings_node_code = (project / 'src/f1tenth_steering.py').read_text() + '''
+import omni.graph.core as og
+from isaacsim.core.experimental.prims import Articulation
+
+def setup(db):
+    root = str(db.node.get_prim_path()).rsplit('/ROS/', 1)[0]
+    db.per_instance_state.steering = F1TenthSteering(root, Articulation(root))
+
+def compute(db):
+    db.outputs.positions = db.per_instance_state.steering.joint_targets(db.inputs.headings)
+    db.outputs.execOut = og.ExecutionAttributeState.ENABLED
+    return True
+'''
 
 values = [('Subscription.inputs:topicName', '/drive'), 
           ('Subscription.inputs:queueSize', 1),
@@ -71,6 +88,8 @@ values = [('Subscription.inputs:topicName', '/drive'),
           ('Ackermann.inputs:frontWheelRadius', .052), 
           ('Ackermann.inputs:backWheelRadius', .052),
           ('Ackermann.inputs:maxWheelRotation', .523599),
+          ('Ackermann.outputs:wheelAngles', [0.0, 0.0]),
+          ('WheelHeadings.inputs:script', wheel_headings_node_code),
           ('Steering.inputs:targetPrim', [Sdf.Path('/F1Tenth')]),
           ('Velocity.inputs:targetPrim', [Sdf.Path('/F1Tenth')]),
           ('Steering.inputs:jointNames', ['Knuckle__Upright__Front_Left', 'Knuckle__Upright__Front_Right']),
@@ -80,7 +99,16 @@ values = [('Subscription.inputs:topicName', '/drive'),
                                           'Wheel__Upright__Rear_Right'])]
 
 og.Controller.edit({'graph_path': '/F1Tenth/ROS/Drive', 'evaluator_name': 'execution'},
-                   {keys.CREATE_NODES: nodes, keys.CONNECT: connections, keys.SET_VALUES: values})
+                   {keys.CREATE_NODES: nodes})
+
+# custom ports
+conversion = og.Controller.node('/F1Tenth/ROS/Drive/WheelHeadings')
+og.Controller.create_attribute(conversion, 'inputs:headings', 'double[]', og.AttributePortType.INPUT)
+og.Controller.create_attribute(conversion, 'outputs:positions', 'double[]', og.AttributePortType.OUTPUT)
+
+og.Controller.edit('/F1Tenth/ROS/Drive', {
+    keys.CONNECT: [('/F1Tenth/ROS/Drive/' + source, '/F1Tenth/ROS/Drive/' + target) for source, target in connections],
+    keys.SET_VALUES: [('/F1Tenth/ROS/Drive/' + name, value) for name, value in values]})
 
 # Sensors graph
 nodes = [('Tick', 'omni.graph.action.OnPlaybackTick')]

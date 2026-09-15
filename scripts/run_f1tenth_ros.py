@@ -25,7 +25,7 @@ sys.path.insert(0, str(project / 'src'))
 from f1tenth_scene import load_scene
 from f1tenth_map import publish_map
 
-for extension in ('isaacsim.ros2.bridge', 'isaacsim.robot.wheeled_robots.nodes'):
+for extension in ('isaacsim.ros2.bridge', 'isaacsim.robot.wheeled_robots.nodes', 'omni.graph.scriptnode'):
     app_utils.enable_extension(extension)
 
 stage = omni.usd.get_context().get_stage()
