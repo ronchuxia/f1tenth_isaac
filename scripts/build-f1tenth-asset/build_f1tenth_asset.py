@@ -53,6 +53,18 @@ for side in ('Left', 'Right'):
     for attr in (shock.GetLocalRot0Attr(), shock.GetLocalRot1Attr()):
         attr.Set(Gf.Quatf(correction * Gf.Quatd(attr.Get())))
 
+# Support the suspension with linear stiffness and damping drives.
+for axle, rest_position in (('Front', 0.02), ('Rear', -0.02)):
+    for side in ('Left', 'Right'):
+        shock = stage.GetPrimAtPath(f'/F1Tenth/Joints/Shock__{axle}_{side}')
+        shock.RemoveAppliedSchema('PhysxLimitAPI:linear')
+        drive = UsdPhysics.DriveAPI.Apply(shock, 'linear')
+        drive.CreateTypeAttr('force')
+        drive.CreateStiffnessAttr(2000)
+        drive.CreateDampingAttr(20)
+        drive.CreateTargetPositionAttr(rest_position)
+        drive.CreateTargetVelocityAttr(0)
+
 # Add Xform base_link
 chassis = stage.GetPrimAtPath('/F1Tenth/Rigid_Bodies/Chassis')
 chassis_world = UsdGeom.XformCache().GetLocalToWorldTransform(chassis)
