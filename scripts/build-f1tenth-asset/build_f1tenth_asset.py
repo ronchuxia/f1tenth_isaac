@@ -42,6 +42,17 @@ for name in ('Wheel__Upright__Rear_Left', 'Wheel__Upright__Rear_Right',
 right_shock = UsdPhysics.Joint(stage.GetPrimAtPath('/F1Tenth/Joints/Shock__Rear_Right'))
 right_shock.GetLocalPos1Attr().Set(Gf.Vec3f(-15.200001, -5.7000003, 7))
 
+# Keep front shock travel in the plane allowed by its mounting hinges.
+for side in ('Left', 'Right'):
+    shock = UsdPhysics.Joint(stage.GetPrimAtPath('/F1Tenth/Joints/Shock__Front_' + side))
+    mount = UsdPhysics.Joint(stage.GetPrimAtPath('/F1Tenth/Joints/Shock__Arm__Front_Lower_' + side))
+    hinge_axis = Gf.Rotation(mount.GetLocalRot0Attr().Get()).TransformDir(Gf.Vec3d.ZAxis())
+    sliding_axis = Gf.Rotation(shock.GetLocalRot0Attr().Get()).TransformDir(Gf.Vec3d.ZAxis())
+    corrected_axis = (sliding_axis - hinge_axis * Gf.Dot(sliding_axis, hinge_axis)).GetNormalized()
+    correction = Gf.Rotation(sliding_axis, corrected_axis).GetQuat()
+    for attr in (shock.GetLocalRot0Attr(), shock.GetLocalRot1Attr()):
+        attr.Set(Gf.Quatf(correction * Gf.Quatd(attr.Get())))
+
 # Add Xform base_link
 chassis = stage.GetPrimAtPath('/F1Tenth/Rigid_Bodies/Chassis')
 chassis_world = UsdGeom.XformCache().GetLocalToWorldTransform(chassis)
