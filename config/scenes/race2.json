@@ -1,0 +1,15 @@
+{
+  "scene": "assets/scenes/race2_atrium_recreation/race2_atrium_recreation.usdc",
+  "spawn": [
+    0.76717,
+    -5.473952,
+    0.075335525,
+    58.649473
+  ],
+  "world_to_map": [
+    6.547302,
+    4.02724,
+    -54.293722
+  ],
+  "map": "maps/race2.yaml"
+}

@@ -1,0 +1,15 @@
+{
+  "scene": "assets/scenes/tepper_hallway_recreation/tepper_hallway_recreation.usdc",
+  "spawn": [
+    -39.049976,
+    -0.65,
+    0.095335525,
+    0.0
+  ],
+  "world_to_map": [
+    39.05,
+    0.65,
+    0.0
+  ],
+  "map": "maps/hallway.yaml"
+}
