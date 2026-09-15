@@ -1,12 +1,15 @@
 """Generate our NVIDIA-based vehicle override using Isaac Sim's Python."""
 import os
+import sys
 from pathlib import Path
 
-from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics
+from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
 
 from f1tenth_lidar_asset import add_lidar
 
 project = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(project / 'scripts/utils'))
+from asset_utils import set_contact_material
 
 source = project / 'assets/robots/f1tenth/nvidia/F1Tenth.usd'
 output = project / 'assets/robots/f1tenth/f1tenth.usda'
@@ -20,6 +23,13 @@ UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
 car = UsdGeom.Xform.Define(stage, '/F1Tenth').GetPrim()
 car.GetReferences().AddReference(os.path.relpath(source, output.parent))
 stage.SetDefaultPrim(car)
+
+# Keep wheel physics material bindings inside the referenced car.
+rubber = UsdShade.Material(stage.GetPrimAtPath('/F1Tenth/Rubber_Asphalt'))
+set_contact_material(rubber.GetPrim(), 1.0, 0.8, 0.0)
+for name in ('Wheel_Rear_Left', 'Wheel_Rear_Right', 'Wheel_Front_Left', 'Wheel_Front_Right'):
+    wheel = stage.GetPrimAtPath('/F1Tenth/Rigid_Bodies/' + name)
+    UsdShade.MaterialBindingAPI.Apply(wheel).Bind(rubber, materialPurpose='physics')
 
 # Apply DriveAPI
 for name in ('Wheel__Upright__Rear_Left', 'Wheel__Upright__Rear_Right',
