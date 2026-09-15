@@ -8101,5 +8101,12 @@
     "Tepper_Robot_Area_Floor",
     "Tepper_Side_Corridor_Ceiling",
     "Tepper_Side_Corridor_Floor"
-  ]
+  ],
+  "physics_materials": {
+    "Tepper_Polished_Concrete": {
+      "static_friction": 1.0,
+      "dynamic_friction": 0.8,
+      "restitution": 0.0
+    }
+  }
 }

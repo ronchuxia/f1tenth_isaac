@@ -5,6 +5,8 @@ from pathlib import Path
 import bpy
 from pxr import Usd, UsdGeom, UsdLux, UsdPhysics
 
+sys.path.insert(0, str(Path(__file__).resolve().parent / 'utils'))
+from asset_utils import set_contact_material
 
 BLENDER_COLLISION = "f1tenth_collision"
 USD_COLLISION = f"userProperties:{BLENDER_COLLISION}"
@@ -194,6 +196,8 @@ def main():
         DEFAULT_LIGHT_INTENSITY_SCALE,
     )
     stage = Usd.Stage.Open(str(usd_path))
+    for name, properties in configuration.get('physics_materials', {}).items():
+        set_contact_material(stage.GetPrimAtPath('/root/_materials/' + name), **properties)
     authored_collider_count = author_collision(stage)
     scaled_light_count = author_light_intensity(stage, intensity_scale)
     stage.GetRootLayer().Save()

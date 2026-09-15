@@ -9,5 +9,32 @@
     "Race3_Black_Duct_Outer_Ribs",
     "Race3_Yellow_Duct_Inner",
     "Race3_Yellow_Duct_Inner_Ribs"
-  ]
+  ],
+  "physics_materials": {
+    "Carpet_Charcoal": {
+      "static_friction": 1.0,
+      "dynamic_friction": 0.8,
+      "restitution": 0.0
+    },
+    "Carpet_Blue": {
+      "static_friction": 1.0,
+      "dynamic_friction": 0.8,
+      "restitution": 0.0
+    },
+    "Carpet_Tan": {
+      "static_friction": 1.0,
+      "dynamic_friction": 0.8,
+      "restitution": 0.0
+    },
+    "Carpet_Orange": {
+      "static_friction": 1.0,
+      "dynamic_friction": 0.8,
+      "restitution": 0.0
+    },
+    "NSH_Gray_Tile": {
+      "static_friction": 1.0,
+      "dynamic_friction": 0.8,
+      "restitution": 0.0
+    }
+  }
 }
