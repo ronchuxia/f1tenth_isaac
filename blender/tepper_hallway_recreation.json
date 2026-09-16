@@ -8104,8 +8104,8 @@
   ],
   "physics_materials": {
     "Tepper_Polished_Concrete": {
-      "static_friction": 1.0,
-      "dynamic_friction": 0.8,
+      "static_friction": 3.0,
+      "dynamic_friction": 2.4,
       "restitution": 0.0
     }
   }

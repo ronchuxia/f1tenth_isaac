@@ -18,28 +18,28 @@
   ],
   "physics_materials": {
     "Carpet_Charcoal": {
-      "static_friction": 1.0,
-      "dynamic_friction": 0.8,
+      "static_friction": 5.0,
+      "dynamic_friction": 4.0,
       "restitution": 0.0
     },
     "Carpet_Blue": {
-      "static_friction": 1.0,
-      "dynamic_friction": 0.8,
+      "static_friction": 5.0,
+      "dynamic_friction": 4.0,
       "restitution": 0.0
     },
     "Carpet_Tan": {
-      "static_friction": 1.0,
-      "dynamic_friction": 0.8,
+      "static_friction": 5.0,
+      "dynamic_friction": 4.0,
       "restitution": 0.0
     },
     "Carpet_Orange": {
-      "static_friction": 1.0,
-      "dynamic_friction": 0.8,
+      "static_friction": 5.0,
+      "dynamic_friction": 4.0,
       "restitution": 0.0
     },
     "NSH_Gray_Tile": {
-      "static_friction": 1.0,
-      "dynamic_friction": 0.8,
+      "static_friction": 3.0,
+      "dynamic_friction": 2.4,
       "restitution": 0.0
     }
   }
