@@ -49,18 +49,18 @@ print('CHASSIS COM (m)', list(chasis_com), flush=True)
 keys = og.Controller.Keys
 
 # Drive graph
-nodes = [('Tick', 'omni.graph.action.OnPlaybackTick'),
+nodes = [('Tick', 'isaacsim.core.nodes.OnPhysicsStep'),
          ('Subscription', 'isaacsim.ros2.bridge.ROS2SubscribeAckermannDrive'),
          ('Ackermann', 'isaacsim.robot.wheeled_robots.AckermannController'),
          ('WheelHeadings', 'omni.graph.scriptnode.ScriptNode'),
          ('Steering', 'isaacsim.core.nodes.IsaacArticulationController'),
          ('Velocity', 'isaacsim.core.nodes.IsaacArticulationController')]
 
-connections = [('Tick.outputs:tick', 'Subscription.inputs:execIn'),
+connections = [('Tick.outputs:step', 'Subscription.inputs:execIn'),
                ('Subscription.outputs:execOut', 'Ackermann.inputs:execIn'),
                ('Subscription.outputs:speed', 'Ackermann.inputs:speed'),
                ('Subscription.outputs:steeringAngle', 'Ackermann.inputs:steeringAngle'),
-               ('Tick.outputs:tick', 'WheelHeadings.inputs:execIn'),
+               ('Tick.outputs:step', 'WheelHeadings.inputs:execIn'),
                ('WheelHeadings.outputs:execOut', 'Steering.inputs:execIn'),
                ('Ackermann.outputs:execOut', 'Velocity.inputs:execIn'),
                ('Ackermann.outputs:wheelAngles', 'WheelHeadings.inputs:headings'),
@@ -76,6 +76,9 @@ def setup(db):
     db.per_instance_state.steering = F1TenthSteering(root, Articulation(root))
 
 def compute(db):
+    # The first physics event precedes articulation tensor initialization.
+    if not db.per_instance_state.steering.robot.is_physics_tensor_entity_valid():
+        return False
     db.outputs.positions = db.per_instance_state.steering.joint_targets(db.inputs.headings)
     db.outputs.execOut = og.ExecutionAttributeState.ENABLED
     return True
@@ -98,7 +101,9 @@ values = [('Subscription.inputs:topicName', '/drive'),
                                           'Wheel__Upright__Rear_Left', 
                                           'Wheel__Upright__Rear_Right'])]
 
-og.Controller.edit({'graph_path': '/F1Tenth/ROS/Drive', 'evaluator_name': 'execution'},
+og.Controller.edit({'graph_path': '/F1Tenth/ROS/Drive',
+                    'evaluator_name': 'execution',
+                    'pipeline_stage': og.GraphPipelineStage.GRAPH_PIPELINE_STAGE_ONDEMAND},
                    {keys.CREATE_NODES: nodes})
 
 # custom ports
@@ -146,11 +151,11 @@ og.Controller.edit({'graph_path': '/F1Tenth/ROS/Sensors', 'evaluator_name': 'exe
 nodes, connections, values = [], [], []
 
 # 1. Clock
-nodes.extend([('Tick', 'omni.graph.action.OnPlaybackTick'),
+nodes.extend([('Tick', 'isaacsim.core.nodes.OnPhysicsStep'),
               ('Time', 'isaacsim.core.nodes.IsaacReadSimulationTime'),
               ('ClockPublish', 'isaacsim.ros2.bridge.ROS2PublishClock')])
 
-connections.extend([('Tick.outputs:tick', 'ClockPublish.inputs:execIn'),
+connections.extend([('Tick.outputs:step', 'ClockPublish.inputs:execIn'),
                     ('Time.outputs:simulationTime', 'ClockPublish.inputs:timeStamp')])
 
 values.extend([('Time.inputs:resetOnStop', False),
@@ -175,7 +180,7 @@ for name, child, parent, child_path, parent_path, optical in frames:
 
     nodes.append((name, 'isaacsim.ros2.bridge.ROS2PublishRawTransformTree'))
 
-    connections.extend([('Tick.outputs:tick', name + '.inputs:execIn'),
+    connections.extend([('Tick.outputs:step', name + '.inputs:execIn'),
                         ('Time.outputs:simulationTime', name + '.inputs:timeStamp')])
     
     values.extend([(name + '.inputs:parentFrameId', parent),
@@ -253,7 +258,7 @@ nodes.extend([('OdomCompute', 'isaacsim.core.nodes.IsaacComputeOdometry'),
               ('BaseAngularVelocityInBase', 'omni.graph.nodes.RotateVector')])
 
 connections.extend([
-    ('Tick.outputs:tick', 'OdomCompute.inputs:execIn'),
+    ('Tick.outputs:step', 'OdomCompute.inputs:execIn'),
     ('OdomCompute.outputs:execOut', 'OdomPublish.inputs:execIn'),
     ('Time.outputs:simulationTime', 'OdomPublish.inputs:timeStamp'),
     ('Identity.inputs:value', 'ChassisToChasisInitRotation.inputs:matrix'),
@@ -293,7 +298,9 @@ values.extend([('OdomCompute.inputs:chassisPrim', [Sdf.Path(chassis)]),
                ('ChassisToBase.inputs:value', baseToChassis.GetInverse()),
                ('ChasisCOMToBase.inputs:value', baseToChassis.ExtractTranslation() - chasis_com)])
 
-og.Controller.edit({'graph_path': '/F1Tenth/ROS/State', 'evaluator_name': 'execution'},
+og.Controller.edit({'graph_path': '/F1Tenth/ROS/State',
+                    'evaluator_name': 'execution',
+                    'pipeline_stage': og.GraphPipelineStage.GRAPH_PIPELINE_STAGE_ONDEMAND},
                    {keys.CREATE_NODES: nodes, keys.CONNECT: connections, keys.SET_VALUES: values})
 
 layer = Sdf.Layer.CreateNew(str(output))

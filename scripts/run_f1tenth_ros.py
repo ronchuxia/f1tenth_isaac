@@ -18,6 +18,8 @@ app = SimulationApp({
     'enable_motion_bvh': True,
     'disable_viewport_updates': True,
     'extra_args': [
+        '--/app/runLoops/main/rateLimitEnabled=true',
+        '--/exts/isaacsim.ros2.nodes/tfAggregation/enabled=false',
         # Read render settings through Fabric instead of also synchronizing USD.
         '--/app/hydra/renderSettings/useUsdAttributes=false',
         '--/rtx-transient/hydra/geometrystreaming/streamingBudgetMBStreaming=1024',
@@ -47,7 +49,7 @@ car = load_scene(
 )
 
 SimulationManager.setup_simulation(dt=1/120, device='cpu')
-RenderingManager.set_dt(1/120)
+RenderingManager.set_dt(1/30)
 app_utils.play()
 
 if not args.headless:
