@@ -13,7 +13,17 @@ args = parser.parse_args()
 project = Path(__file__).resolve().parents[1]
 config = json.loads(args.config.read_text())
 
-app = SimulationApp({'headless': args.headless, 'enable_motion_bvh': True})
+app = SimulationApp({
+    'headless': args.headless,
+    'enable_motion_bvh': True,
+    'disable_viewport_updates': True,
+    'extra_args': [
+        # Read render settings through Fabric instead of also synchronizing USD.
+        '--/app/hydra/renderSettings/useUsdAttributes=false',
+        '--/rtx-transient/hydra/geometrystreaming/streamingBudgetMBStreaming=1024',
+        '--/rtx-transient/hydra/geometrystreaming/geometryMbPerFrame=1024',
+    ],
+})
 
 import omni.usd
 import omni.timeline
